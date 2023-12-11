@@ -8,12 +8,22 @@ function recordKey() {
   apiKey = document.getElementById("input_APIKey").value;
 }
 
+document.getElementById('systemPrompt').value = "You are a tour guide speaking to a group of LENS. You generate lists of key points about a location of interest formatted as a JSON list of strings, where each string is one key point. As an example of the JSON format, use {\"Fact1\": \"Boston is a the capital of Massachusetts.\", \"Fact2\": \"Boston is the oldest city in Massachusetts.\"}"
+
+document.getElementById('userFirstPrompt').value = "Generate five key points about POI. Focus on facts that would be interesting to LENS"
+
+document.getElementById('userDetailsPrompt').value = "Generate five key facts that expand upon FACT. Focus on facts that would be interesting to LENS"
+
 async function fetchDescriptions(lens, locationOfInterest) {
-  travelQuery = "You are a tour guide speaking to a group of " + lens + ". You generate lists of key points about a location of interest formatted as a JSON list of strings, where each string is one key point. As an example of the JSON format, use [\"Fact1\": \"Boston is a the capital of Massachusetts.\", \"Fact2\": \"Boston is the oldest city in Massachusetts.\"]"
+  travelQuery = document.getElementById('systemPrompt').value.replace("LENS", lens);
+  userPrompt = document.getElementById('userFirstPrompt').value.replace("LENS", lens).replace("POI", locationOfInterest);
+
+  console.log(travelQuery)
+  console.log(userPrompt)
   let travelPrompt = {
     messages: [
       { role: "system", content: travelQuery },
-      { role: "user", content: "Generate five key points about " + locationOfInterest + ". Focus on facts that would be interesting to " + lens }],
+      { role: "user", content: userPrompt }],
     model: "gpt-3.5-turbo-1106",
     response_format: { type: "json_object" }
   };
@@ -23,11 +33,13 @@ async function fetchDescriptions(lens, locationOfInterest) {
 }
 
 async function fetchDetails(lens, factToFocus) {
-  travelQuery = "You are a tour guide speaking to a group of " + lens + ". You generate lists of key points about a location of interest formatted as a JSON list of strings, where each string is one key point. As an example of the JSON format, use [\"Fact1\": \"Boston is a the capital of Massachusetts.\", \"Fact2\": \"Boston is the oldest city in Massachusetts.\"]"
+  travelQuery = document.getElementById('systemPrompt').value.replace("LENS", lens);
+  userDetailsPrompt = document.getElementById('userFirstPrompt').value.replace("LENS", lens).replace("POI", lens).replace("FACT", lens);
+
   let travelPrompt = {
     messages: [
       { role: "system", content: travelQuery },
-      { role: "user", content: "Generate five key points that expand upon this face: " + factToFocus + ". Focus on facts that would be interesting to " + lens }],
+      { role: "user", content: userDetailsPrompt }],
     model: "gpt-3.5-turbo-1106",
     response_format: { type: "json_object" }
   };
