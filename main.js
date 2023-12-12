@@ -3,6 +3,8 @@ document.getElementById('submitAPIKey').addEventListener("click", recordKey);
 
 var apiKey = "";
 
+var treeOfResponses = {};
+
 function recordKey() {
   // Get the value entered in the text input
   apiKey = document.getElementById("input_APIKey").value;
@@ -18,8 +20,6 @@ async function fetchDescriptions(lens, locationOfInterest) {
   travelQuery = document.getElementById('systemPrompt').value.replace("LENS", lens);
   userPrompt = document.getElementById('userFirstPrompt').value.replace("LENS", lens).replace("POI", locationOfInterest);
 
-  console.log(travelQuery)
-  console.log(userPrompt)
   let travelPrompt = {
     messages: [
       { role: "system", content: travelQuery },
@@ -28,7 +28,6 @@ async function fetchDescriptions(lens, locationOfInterest) {
     response_format: { type: "json_object" }
   };
   resp = await openAIFetchAPI(travelPrompt, 1, ".")
-  console.log(resp)
   return JSON.parse(resp[0].message.content);
 }
 
@@ -44,7 +43,6 @@ async function fetchDetails(lens, factToFocus) {
     response_format: { type: "json_object" }
   };
   resp = await openAIFetchAPI(travelPrompt, 1, ".")
-  console.log(resp)
   return JSON.parse(resp[0].message.content);
 }
 
@@ -55,23 +53,10 @@ document.getElementById('generate').addEventListener('click', async () => {
   descriptionsContainer.innerHTML = '<p class="text-center">Loading...</p>';
 
   const descriptions = await fetchDescriptions(lens, locationOfInterest);
-  descriptionsContainer.innerHTML = Object.values(descriptions).map(desc =>
-    `<p class="p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-100">${desc}</p>`
-  ).join('');
-});
+  treeOfResponses[locationOfInterest] = {}
+  Object.values(descriptions).map(desc => treeOfResponses[locationOfInterest][desc] = {}) 
+  renderTree(treeOfResponses, locationOfInterest)
 
-// Event delegation for clicking on descriptions to generate more content
-document.getElementById('descriptions').addEventListener('click', async event => {
-  const lens = document.getElementById('lens').value;
-  console.log(event.target.innerText)
-  const factToFocus = event.target.innerText;
-  const descriptionsContainer = document.getElementById('descriptions');
-  descriptionsContainer.innerHTML = '<p class="text-center">Loading...</p>';
-
-  const descriptions = await fetchDescriptions(lens, factToFocus);
-  descriptionsContainer.innerHTML = Object.values(descriptions).map(desc =>
-    `<p class="p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-100">${desc}</p>`
-  ).join('');
 });
 
 async function openAIFetchAPI(prompt, numChoices) {
@@ -79,7 +64,6 @@ async function openAIFetchAPI(prompt, numChoices) {
   const url = "https://api.openai.com/v1/chat/completions";
   const YOUR_TOKEN = apiKey //add your own openai api key
   const bearer = 'Bearer ' + YOUR_TOKEN
-  console.log(prompt)
   const data = await fetch(url, {
     method: 'POST',
     headers: {
@@ -91,4 +75,92 @@ async function openAIFetchAPI(prompt, numChoices) {
     return response.json()
   });
   return data['choices'];
+}
+
+
+function getValueByKeyPath(tree, keyPath) {
+  let current = tree;
+  for (const key of keyPath) {
+    current = current[key];
+  }
+  return current;
+}
+
+function setValueByKeyPath(tree, keyPath, newValue) {
+  const parentPath = keyPath.slice(0, -1);
+  const parent = getValueByKeyPath(tree, parentPath);
+
+  if (parent) {
+    const lastKey = keyPath[keyPath.length - 1];
+    parent[lastKey] = newValue;
+  }
+}
+
+function findKeyPath(tree, targetKey, currentPath = []) {
+  for (const key in tree) {
+    if (key === targetKey) {
+      return [...currentPath, key];
+    }
+
+    if (typeof tree[key] === 'object') {
+      const path = findKeyPath(tree[key], targetKey, [...currentPath, key]);
+      if (path) {
+        return path;
+      }
+    }
+  }
+  return null; // Key not found in the current subtree
+}
+
+document.getElementById('download').addEventListener('click', () => {
+  var content = new Blob([JSON.stringify(treeOfResponses)], { type: 'text/plain' });
+  var downloadLink = document.createElement('a');
+  downloadLink.download = 'download.json';
+  downloadLink.href = window.URL.createObjectURL(content);
+  downloadLink.click();
+  downloadLink.remove();
+});
+
+document.getElementById('pathDisplay').addEventListener('click', () => {
+  currentFirstItem = document.getElementById('descriptions').querySelector('ul').getElementsByTagName('li')[0].innerText
+  if (findKeyPath(treeOfResponses, currentFirstItem).length >= 3) {
+    renderTree(treeOfResponses,findKeyPath(treeOfResponses, currentFirstItem).at(-3))
+  }});
+
+
+function renderTree(tree, parentKey) {
+
+  const ul = document.createElement('ul');
+  ul.className = 'divide-y divide-gray-200';
+  //assumes ever key in tree is unique
+  parentKeyPath = findKeyPath(tree, parentKey);
+  currentSubtree = getValueByKeyPath(tree, parentKeyPath)
+
+  console.log(tree)
+  console.log(treeOfResponses)
+  console.log(parentKey)
+  console.log(parentKeyPath)
+  console.log(currentSubtree)
+  
+  for (const key in currentSubtree) {
+      const li = document.createElement('li');
+      li.className = 'p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-100';
+      li.textContent = key;
+      li.onclick = async () => {
+          const descriptionsContainer = document.getElementById('descriptions');
+          descriptionsContainer.innerHTML = '<p class="text-center">Loading...</p>';
+          if (currentSubtree[key] && Object.keys(currentSubtree[key]).length > 0){
+          }
+          else {
+            const descriptions = await fetchDescriptions(lens, key);
+            Object.values(descriptions).map(desc => setValueByKeyPath(tree,parentKeyPath.concat(key,desc),{})) 
+          }
+          renderTree(tree, key);
+      };
+      ul.appendChild(li);
+  }
+
+  const fileTree = document.getElementById('descriptions');
+  fileTree.innerHTML = '';
+  fileTree.appendChild(ul);
 }
