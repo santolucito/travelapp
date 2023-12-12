@@ -26,11 +26,11 @@
     </div>
     <div class="mb-12">
       <p>System Prompt</p>
-      <textarea id="systemPrompt" cols=5 class="w-full border border-gray-300 rounded-md"></textarea>
+      <textarea id="systemPrompt" rows=15 class="w-full border border-gray-300 rounded-md"></textarea>
       <p>User Prompt (First round)</p>
-      <textarea id="userFirstPrompt" cols=5 class="w-full  border border-gray-300 rounded-md"></textarea>
+      <textarea id="userFirstPrompt" rows=15 class="w-full  border border-gray-300 rounded-md"></textarea>
       <p>User Prompt (Details)</p>
-      <textarea id="userDetailsPrompt" cols=5 class="w-full  border border-gray-300 rounded-md"></textarea>
+      <textarea id="userDetailsPrompt" rows=15 class="w-full  border border-gray-300 rounded-md"></textarea>
     </div>
     <div class="mb-4">
       <label for="lens" class="block text-lg font-semibold mb-2">Choose your lens:</label>
@@ -47,19 +47,20 @@
     </div>
     <button id="generate" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md mb-6">Generate
       Descriptions</button>
-      <button id="download" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md mb-6">Download all
-        Descriptions</button>
-    
+    <button id="download" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md mb-6">Download
+      all
+      Descriptions</button>
+
     <div id="app" class="container mx-auto p-4">
       <div id="pathDisplay" class="p-4 border-b border-gray-200 text-sm font-medium text-gray-500 hover:bg-gray-100">
-          Back
+        Back
       </div>
       <div class="bg-white shadow overflow-hidden sm:rounded-md mt-4">
-          <ul id="descriptions" class="divide-y divide-gray-200">
-              <!-- File tree will be populated here -->
-          </ul>
+        <ul id="descriptions" class="divide-y divide-gray-200">
+          <!-- File tree will be populated here -->
+        </ul>
       </div>
-  </div>
+    </div>
   </div>
 
   <script>
