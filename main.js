@@ -17,8 +17,8 @@ document.getElementById('userFirstPrompt').value = "Generate five key points abo
 document.getElementById('userDetailsPrompt').value = "Generate five key facts that expand upon FACT. Focus on facts that would be interesting to LENS"
 
 async function fetchDescriptions(lens, locationOfInterest) {
-  travelQuery = document.getElementById('systemPrompt').value.replace("LENS", lens);
-  userPrompt = document.getElementById('userFirstPrompt').value.replace("LENS", lens).replace("POI", locationOfInterest);
+  travelQuery = document.getElementById('systemPrompt').value.replaceAll("LENS", lens).replaceAll("POI", locationOfInterest);
+  userPrompt = document.getElementById('userFirstPrompt').value.replaceAll("LENS", lens).replaceAll("POI", locationOfInterest);
 
   let travelPrompt = {
     messages: [
@@ -32,8 +32,8 @@ async function fetchDescriptions(lens, locationOfInterest) {
 }
 
 async function fetchDetails(lens, factToFocus) {
-  travelQuery = document.getElementById('systemPrompt').value.replace("LENS", lens);
-  userDetailsPrompt = document.getElementById('userFirstPrompt').value.replace("LENS", lens).replace("POI", lens).replace("FACT", lens);
+  travelQuery = document.getElementById('systemPrompt').value.replaceAll("LENS", lens).replaceAll("POI", locationOfInterest);
+  userDetailsPrompt = document.getElementById('userFirstPrompt').value.replaceAll("LENS", lens).replaceAll("POI", lens).replaceAll("FACT", lens);
 
   let travelPrompt = {
     messages: [
@@ -54,7 +54,7 @@ document.getElementById('generate').addEventListener('click', async () => {
 
   const descriptions = await fetchDescriptions(lens, locationOfInterest);
   treeOfResponses[locationOfInterest] = {}
-  Object.values(descriptions).map(desc => treeOfResponses[locationOfInterest][desc] = {}) 
+  Object.values(descriptions).map(desc => treeOfResponses[locationOfInterest][desc] = {})
   renderTree(treeOfResponses, locationOfInterest)
 
 });
@@ -124,8 +124,9 @@ document.getElementById('download').addEventListener('click', () => {
 document.getElementById('pathDisplay').addEventListener('click', () => {
   currentFirstItem = document.getElementById('descriptions').querySelector('ul').getElementsByTagName('li')[0].innerText
   if (findKeyPath(treeOfResponses, currentFirstItem).length >= 3) {
-    renderTree(treeOfResponses,findKeyPath(treeOfResponses, currentFirstItem).at(-3))
-  }});
+    renderTree(treeOfResponses, findKeyPath(treeOfResponses, currentFirstItem).at(-3))
+  }
+});
 
 
 function renderTree(tree, parentKey) {
@@ -141,23 +142,23 @@ function renderTree(tree, parentKey) {
   console.log(parentKey)
   console.log(parentKeyPath)
   console.log(currentSubtree)
-  
+
   for (const key in currentSubtree) {
-      const li = document.createElement('li');
-      li.className = 'p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-100';
-      li.textContent = key;
-      li.onclick = async () => {
-          const descriptionsContainer = document.getElementById('descriptions');
-          descriptionsContainer.innerHTML = '<p class="text-center">Loading...</p>';
-          if (currentSubtree[key] && Object.keys(currentSubtree[key]).length > 0){
-          }
-          else {
-            const descriptions = await fetchDescriptions(lens, key);
-            Object.values(descriptions).map(desc => setValueByKeyPath(tree,parentKeyPath.concat(key,desc),{})) 
-          }
-          renderTree(tree, key);
-      };
-      ul.appendChild(li);
+    const li = document.createElement('li');
+    li.className = 'p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-100';
+    li.textContent = key;
+    li.onclick = async () => {
+      const descriptionsContainer = document.getElementById('descriptions');
+      descriptionsContainer.innerHTML = '<p class="text-center">Loading...</p>';
+      if (currentSubtree[key] && Object.keys(currentSubtree[key]).length > 0) {
+      }
+      else {
+        const descriptions = await fetchDescriptions(lens, key);
+        Object.values(descriptions).map(desc => setValueByKeyPath(tree, parentKeyPath.concat(key, desc), {}))
+      }
+      renderTree(tree, key);
+    };
+    ul.appendChild(li);
   }
 
   const fileTree = document.getElementById('descriptions');
