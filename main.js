@@ -14,7 +14,7 @@ document.getElementById('systemPrompt').value = "You are a tour guide speaking t
 
 document.getElementById('userFirstPrompt').value = "Generate five key points about POI. Focus on facts that would be interesting to LENS"
 
-document.getElementById('userDetailsPrompt').value = "Generate five key facts that expand upon FACT. Focus on facts that would be interesting to LENS"
+document.getElementById('userDetailsPrompt').value = "Generate five key facts that expand upon TOPIC. Focus on facts that would be interesting to LENS"
 
 async function fetchDescriptions(lens, locationOfInterest) {
   travelQuery = document.getElementById('systemPrompt').value.replaceAll("LENS", lens).replaceAll("POI", locationOfInterest);
@@ -33,7 +33,7 @@ async function fetchDescriptions(lens, locationOfInterest) {
 
 async function fetchDetails(lens, factToFocus) {
   travelQuery = document.getElementById('systemPrompt').value.replaceAll("LENS", lens).replaceAll("POI", locationOfInterest);
-  userDetailsPrompt = document.getElementById('userFirstPrompt').value.replaceAll("LENS", lens).replaceAll("POI", lens).replaceAll("FACT", lens);
+  userDetailsPrompt = document.getElementById('userFirstPrompt').value.replaceAll("LENS", lens).replaceAll("POI", lens).replaceAll("TOPIC", lens);
 
   let travelPrompt = {
     messages: [
