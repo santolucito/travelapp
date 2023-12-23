@@ -36,6 +36,7 @@ async function fetchDescriptions(lens, locationOfInterest) {
     response_format: { type: "json_object" }
   };
   resp = await openAIFetchAPI(travelPrompt, 1, ".")
+  console.log(resp)
   return JSON.parse(resp[0].message.content);
 }
 
@@ -68,6 +69,15 @@ document.getElementById('generate').addEventListener('click', async () => {
 });
 
 async function openAIFetchAPI(prompt, numChoices) {
+  if (apiKey == "test") {
+    return [{'message':{'content':JSON.stringify({
+      "Fact1": Math.random()*100, 
+      "Fact2":  Math.random()*100,
+      "Fact3":  Math.random()*100,
+      "Fact4":  Math.random()*100,
+      "Fact5":  Math.random()*100
+    })}}]
+  }
   console.log("Calling GPT4")
   const url = "https://api.openai.com/v1/chat/completions";
   const YOUR_TOKEN = apiKey //add your own openai api key
@@ -158,6 +168,7 @@ function renderTree(tree, parentKey) {
     li.onclick = async () => {
       const descriptionsContainer = document.getElementById('descriptions');
       descriptionsContainer.innerHTML = '<p class="text-center">Loading...</p>';
+
       if (currentSubtree[key] && Object.keys(currentSubtree[key]).length > 0) {
       }
       else {
@@ -168,6 +179,9 @@ function renderTree(tree, parentKey) {
     };
     ul.appendChild(li);
   }
+
+  const pathDisplay = document.getElementById('pathDisplay');
+  pathDisplay.innerHTML = parentKeyPath
 
   const fileTree = document.getElementById('descriptions');
   fileTree.innerHTML = '';
