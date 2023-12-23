@@ -2,6 +2,7 @@ document.getElementById('submitAPIKey').addEventListener("click", recordKey);
 
 
 var apiKey = "";
+var selectedModel = "gpt-3.5-turbo-1106";
 
 var treeOfResponses = {};
 
@@ -16,6 +17,13 @@ document.getElementById('userFirstPrompt').value = "Generate five key points abo
 
 document.getElementById('userDetailsPrompt').value = "Generate five key facts that expand upon TOPIC. Focus on facts that would be interesting to LENS"
 
+    document.addEventListener('DOMContentLoaded', function() {
+        document.getElementById('submitButton').addEventListener('click', function() {
+            var dropdown = document.getElementById('myDropdown');
+            selectedModel= dropdown.value;
+        });
+    });
+
 async function fetchDescriptions(lens, locationOfInterest) {
   travelQuery = document.getElementById('systemPrompt').value.replaceAll("LENS", lens).replaceAll("POI", locationOfInterest);
   userPrompt = document.getElementById('userFirstPrompt').value.replaceAll("LENS", lens).replaceAll("POI", locationOfInterest);
@@ -24,7 +32,7 @@ async function fetchDescriptions(lens, locationOfInterest) {
     messages: [
       { role: "system", content: travelQuery },
       { role: "user", content: userPrompt }],
-    model: "gpt-3.5-turbo-1106",
+    model: selectedModel ,
     response_format: { type: "json_object" }
   };
   resp = await openAIFetchAPI(travelPrompt, 1, ".")
@@ -39,7 +47,7 @@ async function fetchDetails(lens, factToFocus) {
     messages: [
       { role: "system", content: travelQuery },
       { role: "user", content: userDetailsPrompt }],
-    model: "gpt-3.5-turbo-1106",
+    model: selectedModel,
     response_format: { type: "json_object" }
   };
   resp = await openAIFetchAPI(travelPrompt, 1, ".")
