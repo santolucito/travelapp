@@ -43,43 +43,48 @@ app.post('/fetchDescriptions', async (req, res) => {
 });
 
 app.post('/fetchDetails', async (req, res) => {
-    const { lens, topic, locationOfInterest, systemPrompt, userDetailsPrompt, selectedModel } = req.body;
-    
-    // Construct the payload for OpenAI API
-    const travelQuery = systemPrompt.replaceAll("LENS", lens).replaceAll("POI", locationOfInterest);
-    const userPrompt = userDetailsPrompt.replaceAll("LENS", lens).replaceAll("POI", locationOfInterest);
-  
-    let travelPrompt = {
-      messages: [
-        { role: "system", content: travelQuery },
-        { role: "user", content: userPrompt }
-      ],
-      model: model,
-      response_format: { type: "json_object" }
-    };
-  
-    // Call the OpenAI API
-    try {
-      const response = await fetch("https://api.openai.com/v1/chat/completions", {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(travelPrompt)
-      });
-  
-      if (!response.ok) {
-        throw new Error(`Error: ${response.status}`);
-      }
-  
-      const data = await response.json();
-      res.json(data.choices);
-    } catch (error) {
-      res.status(500).send({ error: error.message });
+  const { lens, topic, locationOfInterest, systemPrompt, userDetailsPrompt, model } = req.body;
+
+  // Construct the payload for OpenAI API
+  const travelQuery = systemPrompt.replaceAll("LENS", lens).replaceAll("POI", locationOfInterest);
+  const userPrompt = userDetailsPrompt.replaceAll("LENS", lens).replaceAll("POI", locationOfInterest);
+
+  let travelPrompt = {
+    messages: [
+      { role: "system", content: travelQuery },
+      { role: "user", content: userPrompt }
+    ],
+    model: model,
+    response_format: { type: "json_object" }
+  };
+
+  console.log(travelPrompt)
+
+
+  // Call the OpenAI API
+  try {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(travelPrompt)
+    });
+
+
+    if (!response.ok) {
+      console.log(response)
+      throw new Error(`Error: ${response.status}`);
     }
-  });
-  
-  app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
+
+    const data = await response.json();
+    res.json(data.choices);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
+
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
+});

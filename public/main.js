@@ -51,6 +51,7 @@ function renderTree(tree, parentKey) {
       if (!(currentSubtree[key] && Object.keys(currentSubtree[key]).length > 0)) {
         // Fetch details from the server
         const descriptions = await fetchDetailsFromServer(key);
+        console.log(descriptions)
         Object.values(descriptions).map(desc => setValueByKeyPath(tree, parentKeyPath.concat(key, desc), {}));
       }
       renderTree(tree, key);
@@ -59,7 +60,7 @@ function renderTree(tree, parentKey) {
 
     const pathDisplay = document.getElementById('pathDisplay');
     pathDisplay.innerHTML = parentKeyPath
-  
+
     const fileTree = document.getElementById('descriptions');
     fileTree.innerHTML = '';
     fileTree.appendChild(ul);
@@ -88,7 +89,7 @@ document.getElementById('download').addEventListener('click', () => {
 //server calls
 
 async function fetchDescriptionsFromServer(lens, locationOfInterest, systemPrompt, userFirstPrompt, selectedModel) {
-  
+
   const payload = {
     lens,
     locationOfInterest,
