@@ -74,3 +74,7 @@ app.post('/fetchDetails', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
+
+function getAudio(){
+  //call openAI text to speech
+}
