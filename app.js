@@ -47,7 +47,7 @@ app.post('/fetchDetails', async (req, res) => {
 
   // Construct the payload for OpenAI API
   const travelQuery = systemPrompt.replaceAll("LENS", lens).replaceAll("POI", locationOfInterest);
-  const userPrompt = userDetailsPrompt.replaceAll("LENS", lens).replaceAll("POI", locationOfInterest);
+  const userPrompt = userDetailsPrompt.replaceAll("TOPIC", topic).replaceAll("LENS", lens).replaceAll("POI", locationOfInterest);
 
   let travelPrompt = {
     messages: [
@@ -60,27 +60,13 @@ app.post('/fetchDetails', async (req, res) => {
 
   console.log(travelPrompt)
 
-
   // Call the OpenAI API
   try {
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(travelPrompt)
-    });
-
-
-    if (!response.ok) {
-      console.log(response)
-      throw new Error(`Error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    res.json(data.choices);
+    const response = await openai.chat.completions.create(travelPrompt)
+    console.log(response.choices[0].message.content)
+    res.json(response.choices[0].message.content);
   } catch (error) {
+    console.log(error)
     res.status(500).send({ error: error.message });
   }
 });

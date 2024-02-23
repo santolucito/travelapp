@@ -1,13 +1,6 @@
-document.getElementById('submitAPIKey').addEventListener("click", recordKey);
-
 var apiKey = "";
 
 var treeOfResponses = {};
-
-function recordKey() {
-  // Get the value entered in the text input
-  apiKey = document.getElementById("input_APIKey").value;
-}
 
 document.getElementById('systemPrompt').value = "You are a tour guide speaking to a group of LENS. You generate lists of key points about a location of interest formatted as a JSON list of strings, where each string is one key point. As an example of the JSON format, use {\"Fact1\": \"Boston is a the capital of Massachusetts.\", \"Fact2\": \"Boston is the oldest city in Massachusetts.\"}"
 
@@ -51,8 +44,8 @@ function renderTree(tree, parentKey) {
       if (!(currentSubtree[key] && Object.keys(currentSubtree[key]).length > 0)) {
         // Fetch details from the server
         const descriptions = await fetchDetailsFromServer(key);
-        console.log(descriptions)
-        Object.values(descriptions).map(desc => setValueByKeyPath(tree, parentKeyPath.concat(key, desc), {}));
+        console.log(JSON.parse(descriptions))
+        Object.values(JSON.parse(descriptions)).map(desc => setValueByKeyPath(tree, parentKeyPath.concat(key, desc), {}));
       }
       renderTree(tree, key);
     };
