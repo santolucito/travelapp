@@ -1,3 +1,22 @@
+body {
+    font-family: 'Open Sans', sans-serif;
+  }
+
+
+.blue-button {
+  background-color: #3b82f6; /* Equivalent to bg-blue-500 */
+  color: #fff; /* Equivalent to text-white */
+  font-weight: bold; /* Equivalent to font-bold */
+  padding: 0.5rem 1rem; /* Equivalent to py-2 px-4 */
+  border-radius: 0.375rem; /* Equivalent to rounded-md */
+  transition: background-color 0.3s ease; /* Hover effect */
+}
+
+.blue-button:hover {
+  background-color: #2563eb; /* Equivalent to hover:bg-blue-700 */
+}
+  
+
 #loading-bar-spinner.spinner {
     left: 50%;
     margin-left: -20px;

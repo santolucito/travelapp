@@ -2,6 +2,8 @@ import express from 'express';
 import fetch from 'node-fetch';
 import dotenv from 'dotenv';
 import OpenAI from "openai";
+import fs from "fs";
+import path from "path";
 
 dotenv.config();
 
@@ -71,10 +73,29 @@ app.post('/fetchDetails', async (req, res) => {
   }
 });
 
+const publicPath = path.resolve('public');
+
+app.post('/generate-audio', async (req, res) => {
+  if (!req.body.text) {
+    throw new Error('Text is required');
+  }
+  try {
+    const mp3 = await openai.audio.speech.create({
+      model: "tts-1",
+      voice: "alloy",
+      input: req.body.text,
+    });
+    const buffer = Buffer.from(await mp3.arrayBuffer());
+    const speechFile = path.join(publicPath, 'speech.mp3');
+    await fs.promises.writeFile(speechFile, buffer);
+    res.json(`/speech.mp3`);
+  } catch (error) {
+    console.error('Error generating audio:', error);
+    res.status(500).json({ error: 'Failed to generate audio' });
+  }
+});
+
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
-
-function getAudio(){
-  //call openAI text to speech
-}

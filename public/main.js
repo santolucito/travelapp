@@ -25,39 +25,67 @@ document.getElementById('generate').addEventListener('click', async () => {
 });
 
 function renderTree(tree, parentKey) {
-  const ul = document.createElement('ul');
-  ul.className = 'divide-y divide-gray-200';
-  parentKeyPath = findKeyPath(tree, parentKey);
-  currentSubtree = getValueByKeyPath(tree, parentKeyPath)
+  const parentKeyPath = findKeyPath(tree, parentKey);
+  const currentSubtree = getValueByKeyPath(tree, parentKeyPath);
 
-  console.log(currentSubtree);
+  const containerDiv = document.createElement('div');
+  containerDiv.className = 'divide-y divide-gray-200';
 
   for (const key in currentSubtree) {
-    console.log(key)
-    const li = document.createElement('li');
-    li.className = 'p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-100';
-    li.textContent = key;
-    li.onclick = async () => {
+    const itemDiv = document.createElement('div');
+    itemDiv.className = 'p-4 border-b border-gray-200 cursor-pointer hover:bg-gray-100';
+
+    const audioButton = document.createElement('button');
+    audioButton.textContent = 'Listen';
+    audioButton.className = 'blue-button mb-6';
+    audioButton.onclick = (event) => {
+      fetchTTSAudio(key)
+        .then(audioUrl => {
+          if (audioUrl) {
+            audioPlayer.src = audioUrl;
+            audioPlayer.play();
+          }
+        });
+    };
+
+    const moreButton = document.createElement('button');
+    moreButton.textContent = 'Find out More';
+    moreButton.className = 'blue-button mb-6"';
+    moreButton.onclick = async () => {
       const descriptionsContainer = document.getElementById('descriptions');
       descriptionsContainer.innerHTML = '<p class="text-center">Loading...</p>';
 
       if (!(currentSubtree[key] && Object.keys(currentSubtree[key]).length > 0)) {
-        // Fetch details from the server
         const descriptions = await fetchDetailsFromServer(key);
         console.log(JSON.parse(descriptions))
         Object.values(JSON.parse(descriptions)).map(desc => setValueByKeyPath(tree, parentKeyPath.concat(key, desc), {}));
       }
       renderTree(tree, key);
     };
-    ul.appendChild(li);
 
-    const pathDisplay = document.getElementById('pathDisplay');
-    pathDisplay.innerHTML = parentKeyPath
+    const audioPlayer = document.createElement('audio');
+    audioPlayer.id = 'audioPlayer';
+    audioPlayer.controls = true;
 
-    const fileTree = document.getElementById('descriptions');
-    fileTree.innerHTML = '';
-    fileTree.appendChild(ul);
+    itemDiv.appendChild(document.createTextNode(key + ' '));
+    itemDiv.appendChild(document.createElement('br')); // Add a line break
+    itemDiv.appendChild(audioButton);
+    itemDiv.appendChild(document.createTextNode(' '));
+    itemDiv.appendChild(moreButton);
+    itemDiv.appendChild(audioPlayer);
+
+    
+    itemDiv.onclick = 
+
+    containerDiv.appendChild(itemDiv);
   }
+
+  const pathDisplay = document.getElementById('pathDisplay');
+  pathDisplay.innerHTML = parentKeyPath;
+
+  const fileTree = document.getElementById('descriptions');
+  fileTree.innerHTML = '';
+  fileTree.appendChild(containerDiv);
 }
 
 //navigate back up the tree
@@ -81,6 +109,27 @@ document.getElementById('download').addEventListener('click', () => {
 
 //server calls
 
+async function fetchTTSAudio(textToSpeak) {
+  try {
+    const response = await fetch('/generate-audio', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        text: textToSpeak
+      })
+    });
+    if (!response.ok) {
+      throw new Error('Failed to generate audio');
+    }
+    const audioUrl = await response.json();
+    return audioUrl;
+    } catch (error) {
+    console.error('Error:', error);
+    return null;
+  }
+}
 async function fetchDescriptionsFromServer(lens, locationOfInterest, systemPrompt, userFirstPrompt, selectedModel) {
 
   const payload = {
